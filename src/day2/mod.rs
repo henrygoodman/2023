@@ -1,5 +1,3 @@
-use std::error::Error;
-
 pub fn solve1(input: Vec<String>) -> i32 {
     let mut ret: i32 = 0; 
     let max_red: i32 = 12;
