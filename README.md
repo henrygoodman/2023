@@ -11,3 +11,7 @@ Day3:
 - Used HashMap to track gear locations and if they have been `seen` i.e. a binary association with another gear
 - Parsing into 2d string array
 - Using a lot of booleans to store state, probably need to think of a better solution as this is difficult to debug (i.e during pass-through, determine if we are currently within a number, and if we have seen a symbol adjacent to any of the digits within the number)
+
+Day4:
+- Used HashSet to calculate set intersection to find number of matches between 2 sets
+- Initialized vec of fixed size with default values (this day was pretty straightforward)
