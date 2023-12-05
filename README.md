@@ -15,3 +15,8 @@ Day3:
 Day4:
 - Used HashSet to calculate set intersection to find number of matches between 2 sets
 - Initialized vec of fixed size with default values (this day was pretty straightforward)
+
+Day5:
+- Very tough, brute force approach results in initializing huge arrays that blow up memory.
+- A slightly better solution is to compute the min of a subset of the ranges using smaller fixes sized arrays. This is still slow, but processable with smaller arrays as it all reduces down to the local min.
+- An optimal approach (not implemented) would involve some smart logic with the ranges, calculate overlaps, applying mapping rules to entire ranges etc.
