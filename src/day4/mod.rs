@@ -4,7 +4,7 @@ use std::collections::HashSet;
 pub fn solve1(input: Vec<String>) -> i32 {
     let mut ret: i32 = 0;
 
-    for (idx, line) in input.iter().enumerate() {
+    for line in input {
         let winning_numbers_str = line.split('|').nth(0).unwrap().split(':').nth(1).unwrap();
         let drawn_numbers_str = line.split('|').nth(1).unwrap();
 

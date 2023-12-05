@@ -19,4 +19,5 @@ Day4:
 Day5:
 - Very tough, brute force approach results in initializing huge arrays that blow up memory.
 - A slightly better solution is to compute the min of a subset of the ranges using smaller fixes sized arrays. This is still slow, but processable with smaller arrays as it all reduces down to the local min.
+- Used rayon to parallelize the computation of each seed range, however this is still bottlenecked by the memory constraint (as we are now just processing arr.len()/2 chunks of memory at once, which requires minimuzing the max size of each range). This approach took 6m 40s to compute and 10GB of RAM.
 - An optimal approach (not implemented) would involve some smart logic with the ranges, calculate overlaps, applying mapping rules to entire ranges etc.
