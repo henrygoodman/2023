@@ -42,7 +42,7 @@ pub fn solve2(input: Vec<String>) -> i128 {
     let x2 = (- b as f64 - (((b * b) - 4.0 * a * c) as f64).sqrt()) / (2.0 * a);
 
     // Get the distance of the range between the zeroes (we dont care about the order, we just want the magnitude of the range). Take floor due to any float inaccuracies
-    (x1 - x2).abs().floor() as i128;
+    (x1 - x2).abs().floor() as i128
 }
 
 
