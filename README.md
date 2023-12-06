@@ -21,3 +21,7 @@ Day5:
 - A slightly better solution is to compute the min of a subset of the ranges using smaller fixes sized arrays. This is still slow, but processable with smaller arrays as it all reduces down to the local min.
 - Used rayon to parallelize the computation of each seed range, however this is still bottlenecked by the memory constraint (as we are now just processing arr.len()/2 chunks of memory at once, which requires minimuzing the max size of each range). This approach took 6m 40s to compute and 10GB of RAM.
 - An optimal approach (not implemented) would involve some smart logic with the ranges, calculate overlaps, applying mapping rules to entire ranges etc.
+
+Day6:
+- Pretty straightforward, part1 uses a simple formula total distance = speed * (total time - speed). We can iterate over all possible speeds to get a count of all possible values
+- Part2 brute force from part1 would take way too long. Instead, I noticed that the above formula resolves to a quadratic, where everything between the zeroes count as a speed whereby the total distance exceeds the race distance. Using the quadratic formula we can compute the zeros, then calculate the range between the zeros to get the total number of ways.
