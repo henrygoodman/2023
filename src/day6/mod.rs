@@ -29,13 +29,12 @@ pub fn solve1(input: Vec<String>) -> i32 {
 // Which resolves to: -x^2 + Tx -R > 0
 
 pub fn solve2(input: Vec<String>) -> i128 {
-    let times: Vec<i128> = input.iter().nth(0).unwrap().split(':').nth(1).unwrap().split_whitespace().map(|x| x.parse::<i128>().unwrap()).collect();
-    let distances: Vec<i128> = input.iter().nth(1).unwrap().split(':').nth(1).unwrap().split_whitespace().map(|x| x.parse::<i128>().unwrap()).collect();
-    let mut ret: i128 = 1;
+    let time: i128 = input.iter().nth(0).unwrap().split(':').nth(1).unwrap().replace(' ', "").parse::<i128>().unwrap();
+    let distance: i128 = input.iter().nth(1).unwrap().split(':').nth(1).unwrap().replace(' ', "").parse::<i128>().unwrap();
 
     let a: f64 = -1.0;
-    let b: f64 = times[0] as f64; // T
-    let c: f64 = - distances[0] as f64; // R
+    let b: f64 = time as f64; // T
+    let c: f64 = - distance as f64; // R
 
     // Compute the zeros of the function using quadratic formula (-b +- sqrt(b^2 - 4ac)/2a )
     let x1 = (- b as f64 + (((b * b) - 4.0 * a * c) as f64).sqrt()) / (2.0 * a);
