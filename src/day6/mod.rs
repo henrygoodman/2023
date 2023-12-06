@@ -33,7 +33,6 @@ pub fn solve2(input: Vec<String>) -> i128 {
     let distances: Vec<i128> = input.iter().nth(1).unwrap().split(':').nth(1).unwrap().split_whitespace().map(|x| x.parse::<i128>().unwrap()).collect();
     let mut ret: i128 = 1;
 
-    let mut total_ways: i128 = 0;
     let a: f64 = -1.0;
     let b: f64 = times[0] as f64; // T
     let c: f64 = - distances[0] as f64; // R
@@ -43,8 +42,7 @@ pub fn solve2(input: Vec<String>) -> i128 {
     let x2 = (- b as f64 - (((b * b) - 4.0 * a * c) as f64).sqrt()) / (2.0 * a);
 
     // Get the distance of the range between the zeroes (we dont care about the order, we just want the magnitude of the range). Take floor due to any float inaccuracies
-    let num_ways = (x1 - x2).abs().floor() as i128;
-    num_ways
+    (x1 - x2).abs().floor() as i128;
 }
 
 
