@@ -1,4 +1,4 @@
-const CURRENT_DAY: i32 = 6;  // Set the current day here
+const CURRENT_DAY: i32 = 7;  // Set the current day here
 
 mod day1;
 mod day2;
@@ -6,6 +6,7 @@ mod day3;
 mod day4;
 mod day5;
 mod day6;
+mod day7;
 
 use std::env;
 use std::path::PathBuf;
@@ -70,6 +71,12 @@ fn main() -> io::Result<()> {
             let input2 = read_lines(input2_path)?;
             println!("{:?}", day6::solve1(input1));
             println!("{:?}", day6::solve2(input2));
+        },
+        7 => {
+            let input1 = read_lines(input1_path)?;
+            let input2 = read_lines(input2_path)?;
+            println!("{:?}", day7::solve1(input1));
+            println!("{:?}", day7::solve2(input2));
         },
         _ => println!("Day not implemented"),
     }

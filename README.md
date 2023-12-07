@@ -26,3 +26,8 @@ Day6:
 - Pretty straightforward, part1 uses a simple formula total distance = speed * (total time - speed). We can iterate over all possible speeds to get a count of all possible values
 - Part2 brute force from part1 would take way too long. Instead, I noticed that the above formula resolves to a quadratic, where everything between the zeroes count as a speed whereby the total distance exceeds the race distance. Using the quadratic formula we can compute the zeros, then calculate the range between the zeros to get the total number of ways.
 - Probably could have used map/reduce in part 1 (these functions seem useful whenever we perform an iteration and then calculation based on the current iterated values)
+
+Day7:
+- Used set logic to determine overall strength of hands based on the unique number of cards (with some differentiation when set length is equal)
+- Implemented a custom sorting function and used `sort_by` to sort the hands based on overall strength and then by the relative value of each card
+- Part2 pretty straightforward, just needed recognizing the possible changes in strength with a `J` in the hand.
