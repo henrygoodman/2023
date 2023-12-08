@@ -127,18 +127,19 @@ pub fn solve2(input: Vec<String>) -> i32 {
         // 4 of a kind or Full house
         else if set.len() == 2 {
             let count = cards.clone().iter().filter(|&&c| c == cards[0]).count();
+            // If we have any amount of J's (1 or 4), then we can make 5OAK
+            if cards.clone().contains(&'J') {
+                strength = 0;
+            }
             // 4 of a kind
-            if count == 1 || count == 4 {
+            else if count == 1 || count == 4 {
                 strength = 1;
             }
             // Full House
             else {
                 strength = 2;
             }
-            // If we have any amount of J's (1 or 4), then we can make 5OAK
-            if cards.clone().contains(&'J') {
-                strength = 0;
-            }
+
         }
         // 3 of a kind or 2 pair
         else if set.len() == 3 {
@@ -173,7 +174,7 @@ pub fn solve2(input: Vec<String>) -> i32 {
             // If we have any J's, we can make a 2OAK
             if cards.clone().contains(&'J') { strength = 5;}
         }
-        hands.push((hand, bid, strength))
+        hands.push((hand, bid, strength));
     }
 
     // Sort each hand based on relative card strength

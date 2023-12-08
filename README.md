@@ -31,3 +31,9 @@ Day7:
 - Used set logic to determine overall strength of hands based on the unique number of cards (with some differentiation when set length is equal)
 - Implemented a custom sorting function and used `sort_by` to sort the hands based on overall strength and then by the relative value of each card
 - Part2 pretty straightforward, just needed recognizing the possible changes in strength with a `J` in the hand.
+
+Day8:
+- Part 1 was pretty trivial, just added nodes to a HashMap and traversed until reached the end node
+- Part 2 came with the realization that I could apply LCM to all paths to get the time at which all paths would repeat and hit 'Z' node.
+    - Initially thought I had to consider any loops after reaching the 'Z' node, i.e. may take 60 steps from A->Z, but then loop for 6 steps over and over. Afterwards investigated that the neighbours of all 'Z' nodes are the same as the neighbours of all 'A' nodes, meaning the loops are the exact same as A->Z.
+    - Also confirmed that each starting node and each endign node are distinct (i.e. every A node goes to exactly one Z node)
