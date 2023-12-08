@@ -64,7 +64,6 @@ pub fn solve1(input: Vec<String>) -> i32 {
         }
         hands.push((hand, bid, strength))
     }
-
     // Sort each hand based on relative card strength
     hands.sort_by(|a, b| {
         let (hand_a, _, str_a) = a;

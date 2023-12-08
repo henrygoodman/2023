@@ -12,11 +12,22 @@ use std::env;
 use std::path::PathBuf;
 use std::fs::File;
 use std::io::{self, BufRead};
+use std::time::Instant;
 
 fn read_lines(filename: PathBuf) -> io::Result<Vec<String>> {
     let file = File::open(filename)?;
     let buf_reader = io::BufReader::new(file);
     buf_reader.lines().collect()
+}
+
+fn time_it<F, T>(f: F) -> (T, u128)
+where
+    F: FnOnce() -> T,
+{
+    let start = Instant::now();
+    let result = f();
+    let duration = start.elapsed().as_micros();
+    (result, duration)
 }
 
 fn main() -> io::Result<()> {
@@ -75,8 +86,10 @@ fn main() -> io::Result<()> {
         7 => {
             let input1 = read_lines(input1_path)?;
             let input2 = read_lines(input2_path)?;
-            println!("{:?}", day7::solve1(input1));
-            println!("{:?}", day7::solve2(input2));
+            let (part1_result, part1_time) = time_it(|| day7::solve1(input1));
+            println!("Part1: {:?}, took {}µs", part1_result, part1_time);
+            let (part2_result, part2_time) = time_it(|| day7::solve2(input2));
+            println!("Part2: {:?}, took {}µs", part2_result, part2_time);
         },
         _ => println!("Day not implemented"),
     }
