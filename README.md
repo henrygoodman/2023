@@ -37,3 +37,6 @@ Day8:
 - Part 2 came with the realization that I could apply LCM to all paths to get the time at which all paths would repeat and hit 'Z' node.
     - Initially thought I had to consider any loops after reaching the 'Z' node, i.e. may take 60 steps from A->Z, but then loop for 6 steps over and over. Afterwards investigated that the neighbours of all 'Z' nodes are the same as the neighbours of all 'A' nodes, meaning the loops are the exact same as A->Z.
     - Also confirmed that each starting node and each endign node are distinct (i.e. every A node goes to exactly one Z node)
+
+Day9:
+- Learnt the `windows` attribute of an iterable, helpful to work on individual slices of a vector (especially here to calculate the difference between 2 elements)
