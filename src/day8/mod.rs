@@ -5,6 +5,7 @@
 
 use std::collections::HashMap;
 use num::integer::lcm;
+use rayon::prelude::*;
 
 pub fn solve1(input: Vec<String>) -> i32 {
     let mut steps: i32 = 0;
@@ -70,11 +71,7 @@ pub fn solve2(input: Vec<String>) -> i64 {
     // Track each starting val and the current node during iteration
     let currs: Vec<String> = starting_nodes;
 
-    // Track the steps each takes to get from A to Z
-    let mut step_vec: Vec<i64> = vec![0; currs.len()];
-
-    // Find the steps for each starting point to reach Z, and the steps it takes to loop back to Z after (checked and all distinct starts goes to a distinct end)
-    for (idx, start) in currs.iter().enumerate() {
+    let step_vec: Vec<i64> = currs.par_iter().map(|start| {
         let mut steps: i64 = 0;
         let mut curr = start.clone();
         while curr.chars().nth(2).unwrap() != end_val {
@@ -88,8 +85,8 @@ pub fn solve2(input: Vec<String>) -> i64 {
                 steps += 1;
             }
         }
-        step_vec[idx] = steps;
-    }
+        steps
+    }).collect();
 
     // It seems that the looping length is the same as the number of steps to get from A-Z (i.e. after Z goes back to a neighbour of A)
     // In this case, we can just get the LCM and return it
