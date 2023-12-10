@@ -1,47 +1,52 @@
-use std::collections::HashSet;
+use std::collections::{HashSet, HashMap};
 
-fn get_neighbours(maze: &[Vec<char>], location: (usize, usize), prev: (usize, usize)) -> Option<(usize, usize)> {
-    let directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]; // NESW
+fn get_neighbours(
+    maze: &[Vec<char>], 
+    location: (usize, usize), 
+    prev: (usize, usize), 
+    movement_map: &HashMap<char, Vec<(i32, i32)>>
+) -> Option<(usize, usize)> {
+    if let Some(directions) = movement_map.get(&maze[location.0][location.1]) {
+        for &(i, j) in directions {
+            let new_i = location.0 as i32 + i;
+            let new_j = location.1 as i32 + j;
 
-    for &(i, j) in &directions {
-        let new_i = location.0 as i32 + i;
-        let new_j = location.1 as i32 + j;
+            if new_i < 0 || new_i >= maze.len() as i32 || new_j < 0 || new_j >= maze[location.0].len() as i32 {
+                continue;
+            }
 
-        if new_i < 0 || new_i >= maze.len() as i32 || new_j < 0 || new_j >= maze[location.0].len() as i32 {
-            continue;
-        }
-
-        let new_location = (new_i as usize, new_j as usize);
-        if new_location == prev {
-            continue;
-        }
-
-        let current_char = maze[location.0][location.1];
-        let neighbour = maze[new_i as usize][new_j as usize];
-
-        match (i, j) {
-            (1, 0) if ("LJ|").contains(neighbour) && ("S7F|").contains(current_char) => return Some(new_location),
-            (-1, 0) if ("7F|").contains(neighbour) && ("SLJ|").contains(current_char) => return Some(new_location),
-            (0, 1) if ("J7-").contains(neighbour) && ("SLF-").contains(current_char) => return Some(new_location),
-            (0, -1) if ("LF-").contains(neighbour) && ("SJ7-").contains(current_char) => return Some(new_location),
-            _ => {}
+            let new_location = (new_i as usize, new_j as usize);
+            if new_location != prev {
+                return Some(new_location);
+            }
         }
     }
-
     None
 }
 
+fn create_movement_map() -> HashMap<char, Vec<(i32, i32)>> {
+    let mut map = HashMap::new();
+    map.insert('S', vec![(1, 0), (-1, 0), (0, 1), (0, -1)]);
+    map.insert('7', vec![(1, 0), (0, -1)]);
+    map.insert('F', vec![(1, 0), (0, 1)]);
+    map.insert('L', vec![(-1, 0), (0, 1)]);
+    map.insert('J', vec![(-1, 0), (0, -1)]);
+    map.insert('|', vec![(1, 0), (-1, 0)]);
+    map.insert('-', vec![(0, 1), (0, -1)]);
+    map
+}
+
 fn find_start_location(maze: &[Vec<char>]) -> (usize, usize) {
-    for (i, line) in maze.iter().enumerate() {
-        if let Some(j) = line.iter().position(|&c| c == 'S') {
-            return (i, j);
-        }
-    }
-    (0, 0) // Default start location if 'S' is not found
+    maze.iter().enumerate()
+        .find_map(|(i, line)| {
+            line.iter().position(|&c| c == 'S').map(|j| (i, j))
+        })
+        .unwrap_or((0, 0))
 }
 
 pub fn solve1(input: Vec<String>) -> i32 {
     let maze: Vec<Vec<char>> = input.iter().map(|line| line.chars().collect()).collect();
+    let movement_map = create_movement_map();
     let starting_location = find_start_location(&maze);
 
     let mut visited = HashSet::new();
@@ -49,7 +54,7 @@ pub fn solve1(input: Vec<String>) -> i32 {
     let mut prev = starting_location;
     visited.insert(current);
 
-    while let Some(next) = get_neighbours(&maze, current, prev) {
+    while let Some(next) = get_neighbours(&maze, current, prev, &movement_map) {
         if !visited.insert(next) {
             break;
         }
@@ -62,6 +67,7 @@ pub fn solve1(input: Vec<String>) -> i32 {
 
 pub fn solve2(input: Vec<String>) -> i32 {
     let maze: Vec<Vec<char>> = input.iter().map(|line| line.chars().collect()).collect();
+    let movement_map = create_movement_map();
     let starting_location = find_start_location(&maze);
 
     let mut visited = HashSet::new();
@@ -69,7 +75,7 @@ pub fn solve2(input: Vec<String>) -> i32 {
     let mut prev = starting_location;
     visited.insert(current);
 
-    while let Some(next) = get_neighbours(&maze, current, prev) {
+    while let Some(next) = get_neighbours(&maze, current, prev, &movement_map) {
         if !visited.insert(next) {
             break;
         }
@@ -78,20 +84,15 @@ pub fn solve2(input: Vec<String>) -> i32 {
     }
 
     let mut ret = 0;
-
     for (i, line) in maze.iter().enumerate() {
         let mut inside = false;
-        let mut tiles_inside = 0;
-
         for (j, &c) in line.iter().enumerate() {
             if visited.contains(&(i, j)) && ("LJ|").contains(c) {
                 inside = !inside;
             } else if inside && !visited.contains(&(i, j)) {
-                tiles_inside += 1;
+                ret += 1;
             }
         }
-
-        ret += tiles_inside;
     }
 
     ret
