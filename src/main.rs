@@ -1,4 +1,4 @@
-const CURRENT_DAY: i32 = 9;  // Set the current day here
+const CURRENT_DAY: i32 = 10;  // Set the current day here
 
 mod day1;
 mod day2;
@@ -9,6 +9,7 @@ mod day6;
 mod day7;
 mod day8;
 mod day9;
+mod day10;
 
 use std::env;
 use std::path::PathBuf;
@@ -107,6 +108,14 @@ fn main() -> io::Result<()> {
             let (part1_result, part1_time) = time_it(|| day9::solve1(input1));
             println!("Part1: {:?}, took {}µs", part1_result, part1_time);
             let (part2_result, part2_time) = time_it(|| day9::solve2(input2));
+            println!("Part2: {:?}, took {}µs", part2_result, part2_time);
+        },
+        10 => {
+            let input1 = read_lines(input1_path)?;
+            let input2 = read_lines(input2_path)?;
+            let (part1_result, part1_time) = time_it(|| day10::solve1(input1));
+            println!("Part1: {:?}, took {}µs", part1_result, part1_time);
+            let (part2_result, part2_time) = time_it(|| day10::solve2(input2));
             println!("Part2: {:?}, took {}µs", part2_result, part2_time);
         },
         _ => println!("Day not implemented"),

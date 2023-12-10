@@ -40,3 +40,6 @@ Day8:
 
 Day9:
 - Learnt the `windows` attribute of an iterable, helpful to work on individual slices of a vector (especially here to calculate the difference between 2 elements)
+
+Day10:
+- Hardest day so far, had to look up some tips to nudge in the right direction, as I knew in the back of my mind there is some mathematical way to determine inside/outside the loop depending on the parity of the loop segments currently passed on each line on a finite plane.
