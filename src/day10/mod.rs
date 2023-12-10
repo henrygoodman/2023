@@ -1,135 +1,113 @@
-fn get_neighbours(maze: Vec<Vec<char>>, location: (usize, usize)) -> Vec<(usize, usize)> {
-    let mut ret: Vec<(usize, usize)> = Vec::new();
+fn get_neighbours(maze: &Vec<Vec<char>>, location: (usize, usize), prev: (usize, usize)) -> Option<(usize, usize)> {
+    let directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]; // NESW
 
-    for i in 0..3 {
-        for j in 0..3 {
-            let i = i - 1 as i32;
-            let j = j - 1 as i32;
-            // Only consider NESW neighbours
-            if !("-1").contains(&(i + j).to_string()) { continue ;}
+    for (i, j) in directions.iter() {
+        let new_i = location.0 as i32 + i;
+        let new_j = location.1 as i32 + j;
 
-            // Continue if any index out of bounds
-            if location.0 as i32 + i < 0 || location.0 as i32 + i >= maze.len() as i32 || location.1 as i32 + j < 0 || location.1 as i32 + j >= maze[location.0].len() as i32 { continue; }
+        if new_i < 0 || new_i >= maze.len() as i32 || new_j < 0 || new_j >= maze[location.0].len() as i32 {
+            continue;
+        }
 
+        let new_location = (new_i as usize, new_j as usize);
+        if new_location == prev {
+            continue;
+        }
 
-            let current_char = maze[location.0][location.1];
-            let neighbour = maze[location.0 + i as usize][location.1 + j as usize];
-            match (i, j) {
-                (1, 0) => {
-                    if ("LJ|").contains(neighbour) && ("S7F|").contains(current_char) {
-                        ret.push((location.0 + i as usize, location.1 + j as usize));
-                    }
-                },
-                (-1, 0) => {
-                    if ("7F|").contains(neighbour) && ("SLJ|").contains(current_char) {
-                        ret.push((location.0 + i as usize, location.1 + j as usize));
-                    }
-                },
-                (0, 1) => {
-                    if ("J7-").contains(neighbour) && ("SLF-").contains(current_char) {
-                        ret.push((location.0 + i as usize, location.1 + j as usize));
-                    }
-                },
-                (0, -1) => {
-                    if ("LF-").contains(neighbour) && ("SJ7-").contains(current_char) {
-                        ret.push((location.0 + i as usize, location.1 + j as usize));
-                    }
-                },
-                _ => todo!()
-            };
+        let current_char = maze[location.0][location.1];
+        let neighbour = maze[new_i as usize][new_j as usize];
+
+        match (*i, *j) {
+            (1, 0) if ("LJ|").contains(neighbour) && ("S7F|").contains(current_char) => {
+                return Some(new_location);
+            },
+            (-1, 0) if ("7F|").contains(neighbour) && ("SLJ|").contains(current_char) => {
+                return Some(new_location);
+            },
+            (0, 1) if ("J7-").contains(neighbour) && ("SLF-").contains(current_char) => {
+                return Some(new_location);
+            },
+            (0, -1) if ("LF-").contains(neighbour) && ("SJ7-").contains(current_char) => {
+                return Some(new_location);
+            },
+            _ => {}
         }
     }
-    return ret;
+
+    None
 }
 
 pub fn solve1(input: Vec<String>) -> i32 {
-    let mut maze: Vec<Vec<char>> = Vec::new();
-    let mut starting_location: (usize, usize) = (0, 0);
-    let mut visited: Vec<(usize, usize)> = Vec::new();
+    let maze: Vec<Vec<char>> = input.iter().map(|line| line.chars().collect()).collect();
+    let mut starting_location = (0, 0);
 
-    for line in input {
-        maze.push(line.chars().collect());
-    }
     for (i, line) in maze.iter().enumerate() {
-        if !visited.is_empty() { break; }
-        for (j, c) in line.iter().enumerate() {
-            if *c == 'S' {
-                starting_location = (i, j);
-                visited.push(starting_location);
-                break;
-            }
-        }
-    }
-    let mut neighbours = get_neighbours(maze.clone(), starting_location);
-    
-    while neighbours.iter().any(|n| !visited.contains(n)) {
-        for n in &neighbours {
-            if !visited.contains(&n) {
-                visited.push(*n);
-                neighbours = get_neighbours(maze.clone(), *n);
-                break;
-            }
+        if let Some(j) = line.iter().position(|&c| c == 'S') {
+            starting_location = (i, j);
+            break;
         }
     }
 
-    visited.len() as i32 / 2 as i32
+    let mut visited = vec![starting_location];
+    let mut current = starting_location;
+    let mut prev = starting_location;
+
+    while let Some(next) = get_neighbours(&maze, current, prev) {
+        if visited.contains(&next) {
+            break;
+        }
+        visited.push(next);
+        prev = current;
+        current = next;
+    }
+
+    visited.len() as i32 / 2
 }
 
 pub fn solve2(input: Vec<String>) -> i32 {
-    let mut ret: i32 = 0;
-    let mut maze: Vec<Vec<char>> = Vec::new();
+    let maze: Vec<Vec<char>> = input.iter().map(|line| line.chars().collect()).collect();
     let mut starting_location: (usize, usize) = (0, 0);
     let mut visited: Vec<(usize, usize)> = Vec::new();
 
-    for line in input {
-        maze.push(line.chars().collect());
-    }
     for (i, line) in maze.iter().enumerate() {
-        if !visited.is_empty() { break; }
-        for (j, c) in line.iter().enumerate() {
-            if *c == 'S' {
+        for (j, &c) in line.iter().enumerate() {
+            if c == 'S' {
                 starting_location = (i, j);
                 visited.push(starting_location);
                 break;
             }
         }
     }
-    let mut neighbours = get_neighbours(maze.clone(), starting_location);
-    
-    while neighbours.iter().any(|n| !visited.contains(n)) {
-        for n in &neighbours {
-            if !visited.contains(&n) {
-                visited.push(*n);
-                neighbours = get_neighbours(maze.clone(), *n);
-                break;
-            }
+
+    let mut visited = vec![starting_location];
+    let mut current = starting_location;
+    let mut prev = starting_location;
+
+    while let Some(next) = get_neighbours(&maze, current, prev) {
+        if visited.contains(&next) {
+            break;
         }
+        visited.push(next);
+        prev = current;
+        current = next;
     }
 
-    let mut inside: bool = false;
+    let mut ret = 0;
 
-    // Traverse row by row, counting the dots when we are inside the loop
-    // We are inside the loop if we pass an upward loop section, and outside once we pass another (toggling)
     for (i, line) in maze.iter().enumerate() {
-        let mut tiles_inside: i32 = 0;
-        for (j, c) in line.iter().enumerate() {
-            if visited.contains(&(i, j)) && ("LJ|").contains(*c) {
+        let mut inside = false;
+        let mut tiles_inside = 0;
+
+        for (j, &c) in line.iter().enumerate() {
+            if visited.contains(&(i, j)) && ("LJ|").contains(c) {
                 inside = !inside;
-            }
-            else if inside && !visited.contains(&(i, j)) {
+            } else if inside && !visited.contains(&(i, j)) {
                 tiles_inside += 1;
             }
         }
+
         ret += tiles_inside;
     }
+
     ret
 }
-
-
-
-
-
-
-
-
-
