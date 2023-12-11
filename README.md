@@ -43,3 +43,6 @@ Day9:
 
 Day10:
 - Hardest day so far, had to look up some tips to nudge in the right direction, as I knew in the back of my mind there is some mathematical way to determine inside/outside the loop depending on the parity of the loop segments currently passed on each line on a finite plane.
+
+Day11:
+- Not bad, I noticed the trick about expanding the distance early, and figured I didn't have to literally expand it. Followed nicely into p2 which was a 1 line change to consider the bigger expansion.

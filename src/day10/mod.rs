@@ -87,7 +87,7 @@ pub fn solve2(input: Vec<String>) -> i32 {
     for (i, line) in maze.iter().enumerate() {
         let mut inside = false;
         for (j, &c) in line.iter().enumerate() {
-            if visited.contains(&(i, j)) && ("LJ|").contains(c) {
+            if  ("LJ|").contains(c) && visited.contains(&(i, j)) {
                 inside = !inside;
             } else if inside && !visited.contains(&(i, j)) {
                 ret += 1;
