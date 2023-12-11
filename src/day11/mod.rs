@@ -75,15 +75,19 @@ pub fn solve2(input: Vec<String>) -> i64 {
     let mut locations: Vec<(usize, usize)> = Vec::new();
 
     for (idx, line) in input.iter().enumerate() {
-        maze.push(line.chars().collect());
-        if !line.contains('#') { empty_rows.push(idx); }
-        else {
-            for (jdx, c) in line.chars().enumerate() {
-                if c == '#' {
-                    locations.push((idx, jdx));
-                }
+        let row: Vec<char> = line.chars().collect();
+        let mut contains_hash = false;
+
+        for (jdx, &c) in row.iter().enumerate() {
+            if c == '#' {
+                contains_hash = true;
+                locations.push((idx, jdx));
             }
         }
+        if !contains_hash {
+            empty_rows.push(idx);
+        }
+        maze.push(row);
     }
 
     // Find empty columns
