@@ -112,14 +112,14 @@ pub fn solve2(input: Vec<String>) -> i64 {
             // Add 1 if the path traverses an empty row/column
             let row_range = min(loc1.0, loc2.0)..max(loc1.0, loc2.0);
             for row in &empty_rows {
-                if row > max(&loc1.0, &loc2.0) { break; }
+                if row >= max(&loc1.0, &loc2.0) { break; }
                 if row_range.contains(row) {
                     distance += 999999;
                 }
             }
             let col_range = min(loc1.1, loc2.1)..max(loc1.1, loc2.1);
             for col in &empty_cols {
-                if col > max(&loc1.1, &loc2.1) { break; }
+                if col >= max(&loc1.1, &loc2.1) { break; }
                 if col_range.contains(col) {
                     distance += 999999;
                 }
