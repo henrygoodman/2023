@@ -46,3 +46,7 @@ Day10:
 
 Day11:
 - Not bad, I noticed the trick about expanding the distance early, and figured I didn't have to literally expand it. Followed nicely into p2 which was a 1 line change to consider the bigger expansion.
+
+Day12:
+- By far hardest day so far, tried a bunch of solutions (brute-force p1, recursive, DP). Finally got DP solution to work by simplifying a row to a base case and building up character by character (determining the total amount of valid solutions at each state) for each potential block, until we run out of blocks (guaranteed to end a block at end of input).
+- Still don't fully understand this solution, some details were inspired a lot by other AOC creators, will try fuly understand over coming days.

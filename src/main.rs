@@ -1,4 +1,4 @@
-const CURRENT_DAY: i32 = 11;  // Set the current day here
+const CURRENT_DAY: i32 = 12;  // Set the current day here
 
 mod day1;
 mod day2;

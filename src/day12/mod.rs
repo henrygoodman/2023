@@ -1,125 +1,103 @@
-pub fn solve1(input: Vec<String>) -> i64 {
-    let mut ret: i64 = 0;
-    let mut maze: Vec<Vec<char>> = Vec::new();
-    let mut empty_rows: Vec<usize> = Vec::new();
-    let mut empty_cols: Vec<usize> = Vec::new();
-    let mut locations: Vec<(usize, usize)> = Vec::new();
+fn count_valid_combinations(row: &[u8], ins: &[u8]) -> usize {
+    // Remove trailing '.' if present in the row (free reduction in input size as trailing . doesn't impact result)
+    let row_without_trailing_dot = if row.last() == Some(&b'.') {
+        &row[..row.len() - 1]
+    } else {
+        row
+    };
 
-    for (idx, line) in input.iter().enumerate() {
-        let row: Vec<char> = line.chars().collect();
-        let mut contains_hash = false;
+    // Prepare the row for dynamic programming by adding a leading '.' (simplify boundary conditions)
+    let mut cleaned_row = Vec::with_capacity(row_without_trailing_dot.len() + 1);
+    cleaned_row.push(b'.');
+    cleaned_row.extend_from_slice(row_without_trailing_dot);
 
-        for (jdx, &c) in row.iter().enumerate() {
-            if c == '#' {
-                contains_hash = true;
-                locations.push((idx, jdx));
-            }
-        }
-        if !contains_hash {
-            empty_rows.push(idx);
-        }
-        maze.push(row);
-    }
+    // Initialize state vectors for dynamic programming
+    // i.e. we will iteratively determine the number of valid states based on the state prior
+    let (mut current_state, mut next_state) = (vec![0; cleaned_row.len() + 1], vec![0; cleaned_row.len() + 1]);
 
-    // Find empty columns
-    let col_count = maze[0].len();
-    for col in 0..col_count {
-        if maze.iter().all(|row| row[col] != '#') {
-            empty_cols.push(col);
+    // Initialize the initial state
+    current_state[0] = 1;
+
+    // Set up initial state based on filled cells in the row
+    for i in 1..cleaned_row.len() {
+        if cleaned_row[i] != b'#' {
+            current_state[i] = 1;
+        } else {
+            break;
         }
     }
 
-    empty_rows.sort_unstable();
-    empty_cols.sort_unstable();
-    
-    // Calculate distance between each location
-    for (i, location) in locations.iter().enumerate() {
-        for j in i+1..locations.len() {
-            let loc1 = location;
-            let loc2 = locations[j];
+    // Iterate over the instructions (block sizes)
+    for &block_size in ins {
+        let block_size = block_size as usize;
+        let mut group_size = 0;
 
-            let mut distance = max(loc1.0, loc2.0) - min(loc1.0, loc2.0) + max(loc1.1, loc2.1) - min(loc1.1, loc2.1);
+        // DP to compute the new state
+        for (i, &cell) in cleaned_row.iter().enumerate() {
+            if cell == b'.' {
+                group_size = 0;
+            } else {
+                group_size += 1;
+            }
 
-            // Add 1 if the path traverses an empty row/column
-            let row_range = min(loc1.0, loc2.0)..max(loc1.0, loc2.0);
-            for row in &empty_rows {
-                if row >= max(&loc1.0, &loc2.0) { break; }
-                if row_range.contains(row) {
-                    distance += 1;
-                }
+            if cell != b'#' {
+                next_state[i + 1] += next_state[i];
             }
-            let col_range = min(loc1.1, loc2.1)..max(loc1.1, loc2.1);
-            for col in &empty_cols {
-                if col >= max(&loc1.1, &loc2.1) { break; }
-                if col_range.contains(col) {
-                    distance += 1;
-                }
+
+            // If we have reached end of block size, check if valid (check if the start-1 point allows us to make a .)
+            // If a valid block, then we can incr the count
+            if group_size >= block_size && cleaned_row[i - block_size] != b'#' {
+                next_state[i + 1] += current_state[i - block_size];
             }
-            ret += distance as i64;
         }
+
+        // Swap state vectors for the next iteration (just move the next_state into the current_state for our next iter)
+        current_state.iter_mut().for_each(|x| *x = 0);
+        (current_state, next_state) = (next_state, current_state);
+    }
+
+    // Return the total valid combinations
+    current_state[cleaned_row.len()]
+}
+
+pub fn solve1(input: Vec<String>) -> i128 {
+    let mut ret: i128 = 0;
+    for line in &input {
+        let mut parts = line.split_whitespace();
+        let row = parts.next().unwrap().chars().collect::<String>();
+        let ins = parts
+            .next()
+            .unwrap()
+            .split(',')
+            .map(|x| x.parse().unwrap())
+            .collect::<Box<_>>();
+
+        let count = count_valid_combinations(row.as_bytes(), ins.as_ref());
+        ret += count as i128;
     }
     ret
 }
 
-pub fn solve2(input: Vec<String>) -> i64 {
-    let mut ret: i64 = 0;
-    let mut maze: Vec<Vec<char>> = Vec::new();
-    let mut empty_rows: Vec<usize> = Vec::new();
-    let mut empty_cols: Vec<usize> = Vec::new();
-    let mut locations: Vec<(usize, usize)> = Vec::new();
+pub fn solve2(input: Vec<String>) -> i128 {
+    let mut ret: i128 = 0;
+    for line in &input {
+        let mut parts = line.split_whitespace();
+        let row = parts.next().unwrap().chars().collect::<String>();
+        let ins = parts
+            .next()
+            .unwrap()
+            .split(',')
+            .map(|x| x.parse::<u8>().unwrap())
+            .collect::<Vec<u8>>();
 
-    for (idx, line) in input.iter().enumerate() {
-        let row: Vec<char> = line.chars().collect();
-        let mut contains_hash = false;
+        // Expand 'row' 5 times with '?' as separator
+        let expanded_row = format!("{}?{}?{}?{}?{}", row, row, row, row, row);
+        
+        // Expand 'ins' 5 times without a separator
+        let expanded_ins = ins.iter().cloned().cycle().take(5 * ins.len()).collect::<Vec<u8>>();
 
-        for (jdx, &c) in row.iter().enumerate() {
-            if c == '#' {
-                contains_hash = true;
-                locations.push((idx, jdx));
-            }
-        }
-        if !contains_hash {
-            empty_rows.push(idx);
-        }
-        maze.push(row);
-    }
-
-    // Find empty columns
-    let col_count = maze[0].len();
-    for col in 0..col_count {
-        if maze.iter().all(|row| row[col] != '#') {
-            empty_cols.push(col);
-        }
-    }
-
-    empty_rows.sort_unstable();
-    empty_cols.sort_unstable();
-    
-    // Calculate distance between each location
-    for (i, location) in locations.iter().enumerate() {
-        for j in i+1..locations.len() {
-            let loc1 = location;
-            let loc2 = locations[j];
-
-            let mut distance = max(loc1.0, loc2.0) - min(loc1.0, loc2.0) + max(loc1.1, loc2.1) - min(loc1.1, loc2.1);
-
-            // Add 1 if the path traverses an empty row/column
-            let row_range = min(loc1.0, loc2.0)..max(loc1.0, loc2.0);
-            for row in &empty_rows {
-                if row >= max(&loc1.0, &loc2.0) { break; }
-                if row_range.contains(row) {
-                    distance += 999999;
-                }
-            }
-            let col_range = min(loc1.1, loc2.1)..max(loc1.1, loc2.1);
-            for col in &empty_cols {
-                if col >= max(&loc1.1, &loc2.1) { break; }
-                if col_range.contains(col) {
-                    distance += 999999;
-                }
-            }
-            ret += distance as i64;
-        }
+        let count = count_valid_combinations(expanded_row.as_bytes(), &expanded_ins);
+        ret += count as i128;
     }
     ret
 }
