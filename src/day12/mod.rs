@@ -1,11 +1,4 @@
-use aoc_utils::prelude::*;
-// Parse input
-// Calculate manhatten distance between each and every galaxy (n * n) distances
-// Add 1 for every empty column/row it traverses
-use std::cmp::max;
-use std::cmp::min;
-
-pub fn solve1(input: Vec<String>) -> PuzzleResult<i64> {
+pub fn solve1(input: Vec<String>) -> i64 {
     let mut ret: i64 = 0;
     let mut maze: Vec<Vec<char>> = Vec::new();
     let mut empty_rows: Vec<usize> = Vec::new();
@@ -65,10 +58,10 @@ pub fn solve1(input: Vec<String>) -> PuzzleResult<i64> {
             ret += distance as i64;
         }
     }
-    Ok(ret)
+    ret
 }
 
-pub fn solve2(input: Vec<String>) -> PuzzleResult<i64> {
+pub fn solve2(input: Vec<String>) -> i64 {
     let mut ret: i64 = 0;
     let mut maze: Vec<Vec<char>> = Vec::new();
     let mut empty_rows: Vec<usize> = Vec::new();
@@ -128,5 +121,5 @@ pub fn solve2(input: Vec<String>) -> PuzzleResult<i64> {
             ret += distance as i64;
         }
     }
-    Ok(ret)
+    ret
 }

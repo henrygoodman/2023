@@ -108,11 +108,11 @@ fn main() -> io::Result<()> {
             let (part2_result, part2_time) = time_it(|| day11::solve2(input.clone()));
             println!("Part2: {:?}, took {}µs", part2_result, part2_time);
         },
-        11 => {
+        12 => {
             let input = read_lines(input_path)?;
-            let (part1_result, part1_time) = time_it(|| day11::solve1(input.clone()));
+            let (part1_result, part1_time) = time_it(|| day12::solve1(input.clone()));
             println!("Part1: {:?}, took {}µs", part1_result, part1_time);
-            let (part2_result, part2_time) = time_it(|| day11::solve2(input.clone()));
+            let (part2_result, part2_time) = time_it(|| day12::solve2(input.clone()));
             println!("Part2: {:?}, took {}µs", part2_result, part2_time);
         },
         _ => println!("Day not implemented"),
