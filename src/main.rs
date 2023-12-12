@@ -11,6 +11,7 @@ mod day8;
 mod day9;
 mod day10;
 mod day11;
+mod day12;
 
 use std::env;
 use std::path::PathBuf;
@@ -29,102 +30,89 @@ where
     F: FnOnce() -> T,
 {
     let start = Instant::now();
-    let result = f();
-    let duration = start.elapsed().as_micros();
-    (result, duration)
+    (f(), start.elapsed().as_micros())
 }
 
 fn main() -> io::Result<()> {
-    // Get the directory containing Cargo.toml
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
 
-    let input1_path = PathBuf::from(manifest_dir.clone())
+    let input_path = PathBuf::from(manifest_dir.clone())
         .join("src")
         .join("inputs")
         .join(format!("day{}", CURRENT_DAY))
         .join("1.txt");
-    
-    let input2_path = PathBuf::from(manifest_dir.clone())
-        .join("src")
-        .join("inputs")
-        .join(format!("day{}", CURRENT_DAY))
-        .join("2.txt");
 
     match CURRENT_DAY {
         1 => {
-            let input1 = read_lines(input1_path)?;
-            let input2 = read_lines(input2_path)?;
-            println!("{:?}", day1::solve1(input1));
-            println!("{:?}", day1::solve2(input2));
+            let input = read_lines(input_path)?;
+            println!("{:?}", day1::solve1(input.clone()));
+            println!("{:?}", day1::solve2(input.clone()));
         },
         2 => {
-            let input1 = read_lines(input1_path)?;
-            let input2 = read_lines(input2_path)?;
-            println!("{:?}", day2::solve1(input1));
-            println!("{:?}", day2::solve2(input2));
+            let input = read_lines(input_path)?;
+            println!("{:?}", day2::solve1(input.clone()));
+            println!("{:?}", day2::solve2(input.clone()));
         },
         3 => {
-            let input1 = read_lines(input1_path)?;
-            let input2 = read_lines(input2_path)?;
-            println!("{:?}", day3::solve1(input1));
-            println!("{:?}", day3::solve2(input2));
+            let input = read_lines(input_path)?;
+            println!("{:?}", day3::solve1(input.clone()));
+            println!("{:?}", day3::solve2(input.clone()));
         },
         4 => {
-            let input1 = read_lines(input1_path)?;
-            let input2 = read_lines(input2_path)?;
-            println!("{:?}", day4::solve1(input1));
-            println!("{:?}", day4::solve2(input2));
+            let input = read_lines(input_path)?;
+            println!("{:?}", day4::solve1(input.clone()));
+            println!("{:?}", day4::solve2(input.clone()));
         },
         5 => {
-            let input1 = read_lines(input1_path)?;
-            let input2 = read_lines(input2_path)?;
-            println!("{:?}", day5::solve1(input1));
-            println!("{:?}", day5::solve2(input2));
+            let input = read_lines(input_path)?;
+            println!("{:?}", day5::solve1(input.clone()));
+            println!("{:?}", day5::solve2(input.clone()));
         },
         6 => {
-            let input1 = read_lines(input1_path)?;
-            let input2 = read_lines(input2_path)?;
-            println!("{:?}", day6::solve1(input1));
-            println!("{:?}", day6::solve2(input2));
+            let input = read_lines(input_path)?;
+            println!("{:?}", day6::solve1(input.clone()));
+            println!("{:?}", day6::solve2(input.clone()));
         },
         7 => {
-            let input1 = read_lines(input1_path)?;
-            let input2 = read_lines(input2_path)?;
-            let (part1_result, part1_time) = time_it(|| day7::solve1(input1));
+            let input = read_lines(input_path)?;
+            let (part1_result, part1_time) = time_it(|| day7::solve1(input.clone()));
             println!("Part1: {:?}, took {}µs", part1_result, part1_time);
-            let (part2_result, part2_time) = time_it(|| day7::solve2(input2));
+            let (part2_result, part2_time) = time_it(|| day7::solve2(input.clone()));
             println!("Part2: {:?}, took {}µs", part2_result, part2_time);
         },
         8 => {
-            let input1 = read_lines(input1_path)?;
-            let input2 = read_lines(input2_path)?;
-            let (part1_result, part1_time) = time_it(|| day8::solve1(input1));
+            let input = read_lines(input_path)?;
+            let (part1_result, part1_time) = time_it(|| day8::solve1(input.clone()));
             println!("Part1: {:?}, took {}µs", part1_result, part1_time);
-            let (part2_result, part2_time) = time_it(|| day8::solve2(input2));
+            let (part2_result, part2_time) = time_it(|| day8::solve2(input.clone()));
             println!("Part2: {:?}, took {}µs", part2_result, part2_time);
         },
         9 => {
-            let input1 = read_lines(input1_path)?;
-            let input2 = read_lines(input2_path)?;
-            let (part1_result, part1_time) = time_it(|| day9::solve1(input1));
+            let input = read_lines(input_path)?;
+            let (part1_result, part1_time) = time_it(|| day9::solve1(input.clone()));
             println!("Part1: {:?}, took {}µs", part1_result, part1_time);
-            let (part2_result, part2_time) = time_it(|| day9::solve2(input2));
+            let (part2_result, part2_time) = time_it(|| day9::solve2(input.clone()));
             println!("Part2: {:?}, took {}µs", part2_result, part2_time);
         },
         10 => {
-            let input1 = read_lines(input1_path)?;
-            let input2 = read_lines(input2_path)?;
-            let (part1_result, part1_time) = time_it(|| day10::solve1(input1));
+            let input = read_lines(input_path)?;
+            let (part1_result, part1_time) = time_it(|| day10::solve1(input.clone()));
             println!("Part1: {:?}, took {}µs", part1_result, part1_time);
-            let (part2_result, part2_time) = time_it(|| day10::solve2(input2));
+            let (part2_result, part2_time) = time_it(|| day10::solve2(input.clone()));
             println!("Part2: {:?}, took {}µs", part2_result, part2_time);
         },
         11 => {
-            let input1 = read_lines(input1_path)?;
-            let input2 = read_lines(input2_path)?;
-            let (part1_result, part1_time) = time_it(|| day11::solve1(input1));
+            let input = read_lines(input_path)?;
+            let (part1_result, part1_time) = time_it(|| day11::solve1(input.clone()));
             println!("Part1: {:?}, took {}µs", part1_result, part1_time);
-            let (part2_result, part2_time) = time_it(|| day11::solve2(input2));
+            let (part2_result, part2_time) = time_it(|| day11::solve2(input.clone()));
+            println!("Part2: {:?}, took {}µs", part2_result, part2_time);
+        },
+        11 => {
+            let input = read_lines(input_path)?;
+            let (part1_result, part1_time) = time_it(|| day11::solve1(input.clone()));
+            println!("Part1: {:?}, took {}µs", part1_result, part1_time);
+            let (part2_result, part2_time) = time_it(|| day11::solve2(input.clone()));
             println!("Part2: {:?}, took {}µs", part2_result, part2_time);
         },
         _ => println!("Day not implemented"),
