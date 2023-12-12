@@ -87,8 +87,8 @@ pub fn solve2(input: Vec<String>) -> i128 {
             .next()
             .unwrap()
             .split(',')
-            .map(|x| x.parse::<u8>().unwrap())
-            .collect::<Vec<u8>>();
+            .map(|x| x.parse().unwrap())
+            .collect::<Box<_>>();
 
         // Expand 'row' 5 times with '?' as separator
         let expanded_row = format!("{}?{}?{}?{}?{}", row, row, row, row, row);
