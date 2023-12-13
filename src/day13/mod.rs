@@ -1,15 +1,12 @@
 // Processes a grid and returns the reflection index score
 // For a proper mirror, we need to mirror until we hit the edge of the grid
 fn process1(grid: &Vec<Vec<char>>) -> i64 {
-    println!();
-    for (i, line) in grid.iter().enumerate() {
-        println!("{:>2} {:?}", i, line);
-    }
     // Look for horizontal mirror
     for (i, line) in grid.iter().enumerate().skip(1) {
         let mut mirror_index: i32 = -1;
-        if i > 0 && line == &grid[i-1] {
-            println!("Potential horizontal mirror index found: {:?}", i-1);
+
+        // Potential mirror found
+        if line == &grid[i-1] {
             mirror_index = i as i32 -1;
         }
 
@@ -18,32 +15,31 @@ fn process1(grid: &Vec<Vec<char>>) -> i64 {
             let mut prev: i32 = i as i32 -1;
             let mut next: i32 = i as i32;
             while prev >= 0 && next < grid.len() as i32 {
-                println!("{} {}", prev, next);
+                // Stop checking if the rows are not equal
                 if grid[next as usize] != grid[prev as usize] {
-                    println!("Index not mirrored: {} {}", prev, next);
                     mirror_index = -1;
                     break;
                 }
                 prev -= 1;
                 next += 1;
             }
+            // If we have exhausted the loop, all rows upto the edges are mirrored.
+            // Return the index if we have found a successful match
             if mirror_index != -1 {
-                println!("Mirror found {}", i);
                 return i as i64;
             }
         }
     }
+    // Return 0 if no mirrors found
     0
 }
 
 fn process2(grid: &Vec<Vec<char>>) -> i64 {
-    let mut smudge_fixed: bool = false;
     let mut mirror_index: i32 = -1;
-    for (i, line) in grid.iter().enumerate() {
-        println!("{:>2} {:?}", i, line);
-    }
+
     // Look for horizontal mirror
     for (i, line) in grid.iter().enumerate().skip(1) {
+        let mut smudge_fixed: bool = false;
         let mut diff_count = 0;
         let prev_line = &grid[i-1];
 
@@ -56,62 +52,66 @@ fn process2(grid: &Vec<Vec<char>>) -> i64 {
             }
         }
 
+        // Potential mirror found
         if diff_count <= 1 {
-            println!("Potential mirror index found: {}", i-1);
             mirror_index = i as i32 - 1;
-            if diff_count == 1 { smudge_fixed = true };
-        }
-
-        if smudge_fixed && mirror_index == 0 || mirror_index == grid.len() as i32 - 1 {
-            println!("Mirror found {}", i);
-            return i as i64;
         }
 
         // Explore potential mirror index
         if mirror_index != -1 {
             let mut prev: i32 = i as i32 -1;
             let mut next: i32 = i as i32;
-            while prev >= 0 && next < grid.len() as i32 {
-                println!("{} {}", prev, next);
 
-                if smudge_fixed && grid[next as usize] != grid[prev as usize] {
-                    println!("Index not mirrored: {} {}", prev, next);
-                    mirror_index = -1;
-                    break;
-                }
-                else if !smudge_fixed {
-                    println!("Analysing row where smudge hasnt been fixed yet");
-                    for (ch1, ch2) in grid[next as usize].iter().zip(&grid[prev as usize]) {
-                        if ch1 != ch2 {
-                            diff_count += 1;
-                            if diff_count > 1 {
-                                break;
-                            }
-                        }
-                    }
-                    if diff_count == 1 {
-                        smudge_fixed = true;
-                        println!("Index can be mirrored by fixing smudge: {} {}", prev, next);
-                    } else if diff_count > 1 {
-                        println!("Index not mirrored: {} {}", prev, next);
+            while prev >= 0 && next < grid.len() as i32 {
+
+                if grid[next as usize] != grid[prev as usize] {
+                    // Handle if current rows are unequal but we have already fixed a smudge
+                    if smudge_fixed {
                         mirror_index = -1;
                         break;
                     }
+                    // Handle checking row when smudge has not yet been fixed
+                    else {
+                        let mut diff_count2 = 0;
+                        for (ch1, ch2) in grid[next as usize].iter().zip(&grid[prev as usize]) {
+                            if ch1 != ch2 {
+                                diff_count2 += 1;
+                                if diff_count2 > 1 {
+                                    break;
+                                }
+                            }
+                        }
+                        // Indicates rows can be mirrored by fixing a smudge
+                        if diff_count2 == 1 {
+                            smudge_fixed = true;
+                        }
+                         // Row differs too much to be fixable
+                        else if diff_count2 > 1 {
+                            mirror_index = -1;
+                            break;
+                        }
+                    }
                 }
+                // If nothing runs in this loop, just means lines are equal
                 prev -= 1;
                 next += 1;
             }
+            // Handle where we exit with a mirror, only return the index if the mirror fixed a smudge, else continue
             if smudge_fixed && mirror_index != -1 {
-                println!("Mirror found {}", i);
                 return i as i64;
+            }
+            // If no smudge fixed, reset the mirror index
+            else if mirror_index != -1 {
+                mirror_index = -1;
             }
         }
     }
+    // Return 0 if no mirrors found
     0
 }
 
+// Transposes a matrix to make it easier to do comparisons between rows
 fn transpose(grid: &Vec<Vec<char>>) -> Vec<Vec<char>> {
-    println!("Transposing");
     let rows = grid.len();
     let cols = if rows == 0 { 0 } else { grid[0].len() };
 
@@ -122,7 +122,6 @@ fn transpose(grid: &Vec<Vec<char>>) -> Vec<Vec<char>> {
             transposed[j][i] = grid[i][j];
         }
     }
-    println!("Transposing done");
     transposed
 }
 

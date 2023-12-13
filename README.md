@@ -50,3 +50,6 @@ Day11:
 Day12:
 - By far hardest day so far, tried a bunch of solutions (brute-force p1, recursive, DP). Finally got DP solution to work by simplifying a row to a base case and building up character by character (determining the total amount of valid solutions at each state) for each potential block, until we run out of blocks (guaranteed to end a block at end of input).
 - Still don't fully understand this solution, some details were inspired a lot by other AOC creators, will try fuly understand over coming days.
+
+Day13:
+- Not bad, a straightforward approach that just requires thinking logically and fixing any off-by-one errors. Used a matrix transposition trick to work on columns as rows (as it is easier to iterate rows vs columns)
