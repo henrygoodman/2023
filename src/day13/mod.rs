@@ -16,9 +16,11 @@ fn process1(grid: &Vec<Vec<char>>) -> (i64, bool) {
             let mut next: i32 = i as i32;
             while prev >= 0 && next < grid.len() as i32 {
                 // Stop checking if the rows are not equal
-                if grid[next as usize] != grid[prev as usize] {
-                    mirror_index = -1;
-                    break;
+                for (ch1, ch2) in grid[next as usize].iter().zip(&grid[prev as usize]) {
+                    if ch1 != ch2 {
+                        mirror_index = -1;
+                        break;
+                    }
                 }
                 prev -= 1;
                 next += 1;
