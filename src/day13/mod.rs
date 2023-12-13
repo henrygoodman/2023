@@ -1,6 +1,6 @@
 // Processes a grid and returns the reflection index score
 // For a proper mirror, we need to mirror until we hit the edge of the grid
-fn process1(grid: &Vec<Vec<char>>) -> i64 {
+fn process1(grid: &Vec<Vec<char>>) -> (i64, bool) {
     // Look for horizontal mirror
     for (i, line) in grid.iter().enumerate().skip(1) {
         let mut mirror_index: i32 = -1;
@@ -26,15 +26,15 @@ fn process1(grid: &Vec<Vec<char>>) -> i64 {
             // If we have exhausted the loop, all rows upto the edges are mirrored.
             // Return the index if we have found a successful match
             if mirror_index != -1 {
-                return i as i64;
+                return (i as i64, true);
             }
         }
     }
     // Return 0 if no mirrors found
-    0
+    (0, false)
 }
 
-fn process2(grid: &Vec<Vec<char>>) -> i64 {
+fn process2(grid: &Vec<Vec<char>>) -> (i64, bool) {
     let mut mirror_index: i32 = -1;
 
     // Look for horizontal mirror
@@ -98,7 +98,7 @@ fn process2(grid: &Vec<Vec<char>>) -> i64 {
             }
             // Handle where we exit with a mirror, only return the index if the mirror fixed a smudge, else continue
             if smudge_fixed && mirror_index != -1 {
-                return i as i64;
+                return (i as i64, true);
             }
             // If no smudge fixed, reset the mirror index
             else if mirror_index != -1 {
@@ -107,7 +107,7 @@ fn process2(grid: &Vec<Vec<char>>) -> i64 {
         }
     }
     // Return 0 if no mirrors found
-    0
+    (0, false)
 }
 
 // Transposes a matrix to make it easier to do comparisons between rows
@@ -136,9 +136,13 @@ pub fn solve1(input: Vec<String>) -> i64 {
         if line.trim().is_empty() {
             // When an empty line is encountered, push the current grid to the result and start a new grid
             if !current_grid.is_empty() {
-                ret += 100 * process1(&current_grid);
-                current_grid = transpose(&current_grid);
-                ret += process1(&current_grid);
+                let (idx, found) = process1(&current_grid);
+                ret += 100 * idx;
+                if !found {
+                    current_grid = transpose(&current_grid);
+                    let (jdx, _) = process1(&current_grid);
+                    ret += jdx;
+                }
                 current_grid = Vec::new();
             }
         } else {
@@ -163,9 +167,13 @@ pub fn solve2(input: Vec<String>) -> i64 {
         if line.trim().is_empty() {
             // When an empty line is encountered, push the current grid to the result and start a new grid
             if !current_grid.is_empty() {
-                ret += 100 * process2(&current_grid);
-                current_grid = transpose(&current_grid);
-                ret += process2(&current_grid);
+                let (idx, found) = process2(&current_grid);
+                ret += 100 * idx;
+                if !found {
+                    current_grid = transpose(&current_grid);
+                    let (jdx, _) = process2(&current_grid);
+                    ret += jdx;
+                }
                 current_grid = Vec::new();
             }
         } else {
