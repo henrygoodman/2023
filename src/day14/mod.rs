@@ -1,59 +1,140 @@
-// Transposes a matrix to make it easier to do comparisons between rows
-fn transpose(grid: &Vec<Vec<char>>) -> Vec<Vec<char>> {
-    let rows = grid.len();
-    let cols = if rows == 0 { 0 } else { grid[0].len() };
+use std::collections::HashMap;
 
-    let mut transposed = vec![vec![' '; rows]; cols];
-
-    for i in 0..rows {
-        for j in 0..cols {
-            transposed[j][i] = grid[i][j];
-        }
+fn shift_positions(grid: &mut Vec<Vec<char>>, direction: char) {
+    match direction {
+        'N' => shift_north(grid),
+        'W' => shift_west(grid),
+        'S' => shift_south(grid),
+        'E' => shift_east(grid),
+        _ => (),
     }
-    transposed
 }
 
-// Transposed such that North is now the LHS
-// For any row that has an 'O' before a '#'
-// For each 'O', count the number of 'O' to the right of it upto any '#'
+fn shift_north(grid: &mut Vec<Vec<char>>) {
+    for col in 0..grid[0].len() {
+        let mut write_row = 0;
+        for row in 0..grid.len() {
+            if grid[row][col] == '#' { write_row = row + 1; }
+            else if grid[row][col] == 'O' {
+                if row != write_row {
+                    grid[write_row][col] = 'O';
+                    grid[row][col] = '.';
+                }
+                write_row += 1;
+            }
+        }
+    }
+}
+
+fn shift_west(grid: &mut Vec<Vec<char>>) {
+    for row in grid.iter_mut() {
+        let mut write_col = 0;
+        for col in 0..row.len() {
+            if row[col] == '#' { write_col = col + 1; }
+            else if row[col] == 'O' {
+                if col != write_col {
+                    row[write_col] = 'O';
+                    row[col] = '.';
+                }
+                write_col += 1;
+            }
+        }
+    }
+}
+
+fn shift_south(grid: &mut Vec<Vec<char>>) {
+    for col in 0..grid[0].len() {
+        let mut write_row = grid.len() - 1;
+        for row in (0..grid.len()).rev() {
+            if grid[row][col] == '#' { write_row = row - 1; }
+            else if grid[row][col] == 'O' {
+                if row != write_row {
+                    grid[write_row][col] = 'O';
+                    grid[row][col] = '.';
+                }
+                write_row -= 1;
+            }
+        }
+    }
+}
+
+fn shift_east(grid: &mut Vec<Vec<char>>) {
+    for row in grid.iter_mut() {
+        let mut write_col = row.len() - 1;
+        for col in (0..row.len()).rev() {
+            if row[col] == '#' { write_col = col - 1; }
+            else if row[col] == 'O' {
+                if col != write_col {
+                    row[write_col] = 'O';
+                    row[col] = '.';
+                }
+                write_col -= 1;
+            }
+        }
+    }
+}
+
+fn serialize_grid(grid: &[Vec<char>]) -> String {
+    grid.iter()
+        .map(|row| row.iter().collect::<String>())
+        .collect::<Vec<String>>()
+        .join("\n")
+}
+
+fn calculate_final_positions(grid: &[Vec<char>]) -> i64 {
+    grid.iter()
+        .enumerate()
+        .map(|(i, row)| {
+            row.iter().filter(|&&c| c == 'O').count() as i64 * (grid.len() as i64 - i as i64)
+        })
+        .sum()
+}
 
 pub fn solve1(input: Vec<String>) -> i64 {
-    let mut ret: i64 = 0;
     let mut grid: Vec<Vec<char>> = input.iter().map(|line| line.chars().collect()).collect();
-    let orig_len = grid[0].len();
-    grid = transpose(&grid);
 
-    for line in &grid {
-        let mut start_idx = 0;
-        let mut current_pos = 0;
-    
-        while start_idx < line.len() {
-            // Find the next '#' or the end of the line
-            let hash_idx = line.iter().skip(start_idx).enumerate().find(|&(_, &c)| c == '#').map(|(idx, _)| idx + start_idx).unwrap_or(line.len());
-    
-            for i in start_idx..hash_idx {
-                if line[i] == 'O' {
-                    ret += line.len() as i64 - current_pos as i64; // Update ret based on the 'slid' position
-                    current_pos += 1; // Update current_pos for the next rock
-                }
+    shift_positions(&mut grid, 'N');
+    calculate_final_positions(&grid)
+}
+
+pub fn solve2(input: Vec<String>) -> i64 {
+    let mut grid: Vec<Vec<char>> = input.iter().map(|line| line.chars().collect()).collect();
+    let mut seen_states = HashMap::new();
+    let directions = ['N', 'W', 'S', 'E'];
+    let total_iterations: i64 = 1_000_000_000 * 4;
+    let mut iteration = 0;
+    let mut cycle_length = 0;
+
+    while iteration < total_iterations {
+        for &direction in &directions {
+            if iteration >= total_iterations {
+                break;
             }
-    
-            // Update start_idx and current_pos for the next section
-            start_idx = hash_idx + 1;
-            current_pos = start_idx;  // Rocks will start sliding from the next position after '#'
+
+            shift_positions(&mut grid, direction);
+            let serialized = serialize_grid(&grid);
+            let state_key = (serialized, direction);
+
+            if let Some(&previous_iteration) = seen_states.get(&state_key) {
+                if cycle_length == 0 { // First time cycle is detected
+                    cycle_length = iteration - previous_iteration;
+                }
+
+                // Calculate remaining iterations after skipping cycles
+                let remaining_iterations = total_iterations - iteration;
+                let full_cycles_to_skip = remaining_iterations / cycle_length;
+                iteration += full_cycles_to_skip * cycle_length;
+
+                // Clear the states to avoid false cycle detection in remaining iterations
+                seen_states.clear();
+            } else {
+                seen_states.insert(state_key, iteration);
+            }
+            iteration += 1;
         }
     }
-    ret
+    calculate_final_positions(&grid)
 }
 
-// We need to find 1 new line of reflection (either horizontal or vertical)
-// i.e. we cannot simply return on perfectly mirrored.
-// - the question sounds like we should only ever be able to find 1 smudge that gives a new line
-// - if this is the case, then we should only ever find a smudge in 1 location (so it will show up in the same spot)
-pub fn solve2(input: Vec<String>) -> i64 {
-    let mut ret: i64 = 0;
 
-    for line in input {
-    }
-    ret
-}
+

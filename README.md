@@ -53,3 +53,6 @@ Day12:
 
 Day13:
 - Not bad, a straightforward approach that just requires thinking logically and fixing any off-by-one errors. Used a matrix transposition trick to work on columns as rows (as it is easier to iterate rows vs columns)
+
+Day14:
+- Tricky, but doable. Trick was in recognizing the potential cycles in the board (which is feasible to reason about since its a finite board with a large amount of iterations).
