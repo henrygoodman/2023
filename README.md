@@ -56,3 +56,6 @@ Day13:
 
 Day14:
 - Tricky, but doable. Trick was in recognizing the potential cycles in the board (which is feasible to reason about since its a finite board with a large amount of iterations).
+
+Day15:
+- Doable, just requires problem solving and logical thinking rather than heavy algorithmic approach. I guess difficult bit is in dereferencing properly with the HashMap, requires some nested structures and logical access to update those structures.

@@ -1,4 +1,4 @@
-const CURRENT_DAY: i32 = 14;  // Set the current day here
+const CURRENT_DAY: i32 = 15;  // Set the current day here
 
 mod day1;
 mod day2;
@@ -14,6 +14,7 @@ mod day11;
 mod day12;
 mod day13;
 mod day14;
+mod day15;
 
 use std::env;
 use std::path::PathBuf;
@@ -129,6 +130,13 @@ fn main() -> io::Result<()> {
             let (part1_result, part1_time) = time_it(|| day14::solve1(input.clone()));
             println!("Part1: {:?}, took {}µs", part1_result, part1_time);
             let (part2_result, part2_time) = time_it(|| day14::solve2(input.clone()));
+            println!("Part2: {:?}, took {}µs", part2_result, part2_time);
+        },
+        15 => {
+            let input = read_lines(input_path)?;
+            let (part1_result, part1_time) = time_it(|| day15::solve1(input.clone()));
+            println!("Part1: {:?}, took {}µs", part1_result, part1_time);
+            let (part2_result, part2_time) = time_it(|| day15::solve2(input.clone()));
             println!("Part2: {:?}, took {}µs", part2_result, part2_time);
         },
         _ => println!("Day not implemented"),
