@@ -1,134 +1,65 @@
 use std::collections::HashMap;
-use std::sync::Mutex;
-use lazy_static::lazy_static;
 
-lazy_static! {
-    static ref GLOBAL_MAP: Mutex<HashMap<Vec<char>, i64>> = Mutex::new(HashMap::new());
+fn calculate_hash(label: &[char]) -> i64 {
+    label.iter().fold(0, |hash, &c| {
+        ((hash + c as i64) * 17) % 256
+    })
 }
 
-fn calculate_hash(sec: &[char], start_value: i64) -> i64 {
-    let mut hash = start_value;
-
-    for &c in sec {
-        let ascii = c as i64;
-        hash += ascii;
-        hash *= 17;
-        hash %= 256;
-    }
-
-    hash
+struct Lens {
+    label: Vec<char>,
+    focal_length: i64,
 }
 
-fn get_section_hash(sec: &[char], map: &mut HashMap<Vec<char>, i64>) -> i64 {
-    // Check if the hash for the entire sequence is already cached
-    if let Some(&hash) = map.get(sec) {
-        return hash;
-    }
+fn process_step(step: &str, lens_map: &mut HashMap<i64, Vec<Lens>>) {
+    let op_index = step.find(['-', '='].as_ref()).unwrap();
+    let (label_str, operation) = step.split_at(op_index);
+    let label: Vec<char> = label_str.chars().collect();
+    let box_num = calculate_hash(&label);
 
-    // Initialize the hash of the last subsequence (initially 0)
-    let mut last_hash = 0;
+    if let Some(op_char) = operation.chars().next() {
+        match op_char {
+            '=' => {
+                let focal_length = operation[1..].parse::<i64>().unwrap();
+                let lens = Lens { label, focal_length };
+                let entry = lens_map.entry(box_num).or_insert_with(Vec::new);
 
-    // Iterate over all possible subsequences
-    for i in 1..=sec.len() {
-        let sub_sec = &sec[..i];
-        let hash = if let Some(&cached_hash) = map.get(sub_sec) {
-            // Use the cached hash if available
-            cached_hash
-        } else {
-            // Otherwise, calculate the hash, cache it, and use it
-            let new_hash = calculate_hash(sub_sec, 0);
-            map.insert(sub_sec.to_vec(), new_hash);
-            new_hash
-        };
-
-        // Store the hash of the entire sequence when reached
-        if i == sec.len() {
-            last_hash = hash;
-        }
-    }
-
-    // Cache and return the hash of the entire sequence
-    map.insert(sec.to_vec(), last_hash);
-    last_hash
-}
-
-fn process(label: Vec<char>, box_num: i64, op: char, lens: &[char], ret_map: &mut HashMap<i64, Vec<(Vec<char>, i64)>>) {
-    match op {
-        '=' => {
-            let digit = lens[0].to_digit(10).unwrap() as i64;
-            let labels_vec = ret_map.entry(box_num).or_insert_with(Vec::new);
-
-            if let Some(entry) = labels_vec.iter_mut().find(|l| l.0 == label) {
-                // Update the label in place
-                entry.1 = digit;
-            } else {
-                // Add the label if it does not exist
-                labels_vec.push((label, digit));
-            }
-        },
-        '-' => {
-            if let Some(labels_vec) = ret_map.get_mut(&box_num) {
-                // Remove the label if it exists
-                if let Some(index) = labels_vec.iter().position(|l| l.0 == label) {
-                    labels_vec.remove(index);
-                }
-                // Remove the key from the map if labels_vec is empty
-                if labels_vec.is_empty() {
-                    ret_map.remove(&box_num);
+                if let Some(pos) = entry.iter().position(|l| l.label == lens.label) {
+                    entry[pos] = lens;
+                } else {
+                    entry.push(lens);
                 }
             }
-        },
-        _ => {
-            // Handle other operations if necessary
-            println!("Unhandled operation: {}", op);
+            '-' => {
+                if let Some(entry) = lens_map.get_mut(&box_num) {
+                    if let Some(pos) = entry.iter().position(|l| l.label == label) {
+                        entry.remove(pos);
+                    }
+                }
+            }
+            _ => panic!("Invalid operation"),
         }
+    } else {
+        panic!("No operation found in step");
     }
 }
 
 pub fn solve1(input: Vec<String>) -> i64 {
-    let grid: Vec<Vec<char>> = input[0]
-        .split(',')  // Splitting the borrowed string
-        .map(|section| section.chars().collect())
-        .collect();
-    let mut global_map = GLOBAL_MAP.lock().unwrap();
-    grid.iter().map(|sec| get_section_hash(sec, &mut global_map)).sum()
+    input[0].split(',')
+         .map(|step| calculate_hash(&step.chars().collect::<Vec<_>>()))
+         .sum()
 }
 
 pub fn solve2(input: Vec<String>) -> i64 {
-    let mut ret = 0;
-    let grid: Vec<Vec<char>> = input[0]
-        .split(',')
-        .map(|section| section.chars().collect())
-        .collect();
+    let mut lens_map: HashMap<i64, Vec<Lens>> = HashMap::new();
 
-    let global_map = GLOBAL_MAP.lock().unwrap();
-    let mut ret_map: HashMap<i64, Vec<(Vec<char>, i64)>> = HashMap::new();
-
-    // Get the hash of each section up to any '-' or '=' chars
-    for sec in &grid {
-        let index = sec.iter().position(|&c| c == '-' || c == '=').unwrap_or(sec.len());
-        let label = &sec[..index];
-
-        // Label hash gives the box number
-        let box_num = *global_map.get(label).unwrap_or(&0);
-
-        // Check the operation
-        let op_index = sec.iter().position(|&c| c == '-' || c == '=').unwrap();
-        let op = sec[op_index];
-        let lens = &sec[index+1..];
-
-        // Process the label and mutate the HashMap
-        process(label.to_vec(), box_num, op, &lens, &mut ret_map);
+    for step in input[0].split(',') {
+        process_step(step, &mut lens_map);
     }
 
-    for (&box_num, labels_vec) in &ret_map {
-        for (i, label) in labels_vec.iter().enumerate() {
-            ret += (box_num + 1) * (i + 1) as i64 * label.1;
-        }
-    }
-    ret
+    lens_map.iter().map(|(&box_num, lenses)| {
+        lenses.iter().enumerate().map(|(i, lens)| {
+            (box_num + 1) * (i as i64 + 1) * lens.focal_length
+        }).sum::<i64>()
+    }).sum()
 }
-
-
-
-
