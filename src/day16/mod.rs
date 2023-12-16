@@ -64,7 +64,7 @@ struct LightBeam {
 }
 
 impl LightBeam {
-    fn progress(&mut self, grid: &Vec<Position>, height: usize, width: usize) -> Option<LightBeam> {
+    fn progress(&mut self, grid: &[Position], height: usize, width: usize) -> Option<LightBeam> {
         if let Some(new_position_index) = self.get_next_position(height, width) {
             let new_position: Position = grid[new_position_index.0 * width + new_position_index.1];
             let directions = self.direction.update_from_position(new_position);
@@ -102,7 +102,7 @@ impl LightBeam {
     }
 }
 
-fn process(grid: &Vec<Position>, height: usize, width: usize, initial_beam: LightBeam) -> i64 {
+fn process(grid: &[Position], height: usize, width: usize, initial_beam: LightBeam) -> i64 {
     let mut map: HashMap<((usize, usize), Direction), bool> = HashMap::new();
     let mut beams: Vec<LightBeam> = vec![initial_beam];
 
