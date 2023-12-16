@@ -53,9 +53,9 @@ pub fn solve1(input: Vec<String>) -> i64 {
 pub fn solve2(input: Vec<String>) -> i64 {
     let mut lens_map: HashMap<i64, Vec<Lens>> = HashMap::new();
 
-    for step in input[0].split(',') {
+    input[0].split(',').for_each(|step| {
         process_step(step, &mut lens_map);
-    }
+    });
 
     lens_map.iter().map(|(&box_num, lenses)| {
         lenses.iter().enumerate().map(|(i, lens)| {
