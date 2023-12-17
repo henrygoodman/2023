@@ -159,8 +159,6 @@ pub fn solve2(input: Vec<String>) -> i64 {
     let height = input.len();
     let width = input[0].len();
 
-    // Create a HashSet to store unique edge configurations
-    let mut unique_edges: HashSet<(usize, usize, Direction)> = HashSet::new();
     let mut start_positions: Vec<(usize, usize, Direction)> = Vec::new();
 
     // Top and bottom rows
@@ -177,9 +175,6 @@ pub fn solve2(input: Vec<String>) -> i64 {
 
     // Process each unique edge configuration in parallel
     let results: Vec<i64> = start_positions
-        .into_iter()
-        .filter(|&(i, j, dir)| unique_edges.insert((i, j, dir))) // Insert unique edges into HashSet
-        .collect::<Vec<_>>()
         .par_iter()
         .map(|&(i, j, dir)| {
             let initial_beam = LightBeam { position: (i, j), direction: dir, terminated: false };
