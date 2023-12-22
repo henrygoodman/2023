@@ -17,6 +17,7 @@ mod day14;
 mod day15;
 mod day16;
 mod day17;
+mod day18;
 
 use std::env;
 use std::path::PathBuf;
@@ -153,6 +154,13 @@ fn main() -> io::Result<()> {
             let (part1_result, part1_time) = time_it(|| day17::solve1(input.clone()));
             println!("Part1: {:?}, took {}µs", part1_result, part1_time);
             let (part2_result, part2_time) = time_it(|| day17::solve2(input.clone()));
+            println!("Part2: {:?}, took {}µs", part2_result, part2_time);
+        },
+        18 => {
+            let input = read_lines(input_path)?;
+            let (part1_result, part1_time) = time_it(|| day18::solve1(input.clone()));
+            println!("Part1: {:?}, took {}µs", part1_result, part1_time);
+            let (part2_result, part2_time) = time_it(|| day18::solve2(input.clone()));
             println!("Part2: {:?}, took {}µs", part2_result, part2_time);
         },
         _ => println!("Day not implemented"),

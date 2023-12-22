@@ -68,32 +68,46 @@ impl Position {
         }
     }
 
-    fn can_move_in_direction(&self, dir: Direction, min_steps: usize, max_steps: usize) -> bool {
-        let (direction, steps_in_direction) = (self.current_direction(), self.steps_in_direction() as usize);
-        
-        if direction == Direction::Null {
-            return true;
-        }
-    
-        let is_opposite_direction = match (direction, dir) {
-            (Direction::Up, Direction::Down) | (Direction::Down, Direction::Up) => true,
-            (Direction::Left, Direction::Right) | (Direction::Right, Direction::Left) => true,
-            _ => false
+    fn can_move_in_direction(&self, dir: Direction, width: usize, height: usize, min_steps: usize, max_steps: usize) -> bool {
+        let (y, x) = self.position;
+
+        // Check if the move is within the grid boundaries
+        let within_bounds = match dir {
+            Direction::Up => y > 0,
+            Direction::Down => y < height - 1,
+            Direction::Left => x > 0,
+            Direction::Right => x < width - 1,
+            Direction::Null => false,
         };
-    
+
+
+        // Early return if the move is out of bounds
+        if !within_bounds {
+            return false;
+        }
+
+        let (direction, steps_in_direction) = (self.current_direction(), self.steps_in_direction() as usize);
+
+        // Check for moving in the opposite direction
+        let is_opposite_direction = matches!(
+            (direction, dir),
+            (Direction::Up, Direction::Down) | (Direction::Down, Direction::Up) |
+            (Direction::Left, Direction::Right) | (Direction::Right, Direction::Left)
+        );
+
         if is_opposite_direction {
             return false;
         }
+
+        // Check step constraints
+        let can_move = if direction == dir {
+            steps_in_direction < max_steps || max_steps == 0
+        } else {
+            steps_in_direction >= min_steps || direction == Direction::Null
+        };
     
-        if direction == dir {
-            if max_steps > 0 && steps_in_direction >= max_steps {
-                return false;
-            }
-            return true;
-        }
-    
-        // If changing direction, only allow if enough steps were made in the current direction
-        min_steps == 0 || steps_in_direction >= min_steps
+        println!("At position: {:?}, Trying to move: {:?}, CurrentDir: {:?}, Steps: {:?}, Can move: {}", self.position, dir, direction, steps_in_direction, can_move);
+        can_move
     }
 }
 
@@ -104,7 +118,6 @@ struct Grid {
     min_steps: usize,
     max_steps: usize,
     positions: Vec<Position>,
-    predecessors: HashMap<(usize, usize), (usize, usize)>,
 }
 
 impl Grid {
@@ -127,8 +140,7 @@ impl Grid {
             height,
             min_steps,
             max_steps,
-            positions,
-            predecessors: HashMap::new()
+            positions
         }
     }
 
@@ -145,78 +157,43 @@ impl Grid {
     fn find_shortest_path(&mut self, initial_position: Position, end_position: (usize, usize)) -> usize {
         let mut tentative_distances = HashMap::new();
         tentative_distances.insert(initial_position.position, 0);
-    
+
+        let mut paths: HashMap<(usize, usize), Vec<Position>> = HashMap::new();
+        paths.insert(initial_position.position, vec![initial_position]);
+
         let mut heap = BinaryHeap::new();
         heap.push(initial_position);
-    
-        let mut current = initial_position;
 
         while let Some(current) = heap.pop() {
-            println!("Curr: {:?}", current);
-            // Check if current is an end position state
-            if current.position == end_position {
-                println!("Reached end position, breaking.");
-                break;
-            }
-
-            let best_cost = tentative_distances.get(&current.position).unwrap_or(&usize::MAX);
-            println!("Curr: {:?} Best: {:?}", current.cost, best_cost);
-            if current.cost > *best_cost {
-                continue;
-            }
+            let best_cost_current = *tentative_distances.get(&current.position).unwrap_or(&usize::MAX);
 
             if let Some(neighbours) = self.get_neighbours(current) {
-                println!("Curr: {:?} Neigh: {:?}", current, neighbours);
                 for neighbour in neighbours {
-                    let best_cost_neighbour = tentative_distances.get(&current.position).unwrap_or(&usize::MAX);
-                    let new_distance =  *best_cost_neighbour + neighbour.cost;
-                    if new_distance < *best_cost_neighbour {
+                    let new_distance = best_cost_current + neighbour.cost;
+                    let best_cost_neighbour = *tentative_distances.get(&neighbour.position).unwrap_or(&usize::MAX);
+
+                    if new_distance < best_cost_neighbour {
                         tentative_distances.insert(neighbour.position, new_distance);
-                        println!("Pushing: {:?}", neighbour);
-                        heap.push(neighbour);
-                        self.predecessors.insert(neighbour.position, current.position);
+                        let mut new_path = vec![];
+                        if let Some(path) = paths.get(&current.position) {
+                            new_path.extend(path);
+                        }
+                        new_path.push(neighbour.clone());
+                        paths.insert(neighbour.position, new_path);
+                        heap.push(neighbour.clone());
                     }
                 }
             }
-            println!()
         }
 
-
-        // Find the minimum distance to any state at the end position
-        let min_distance = *tentative_distances.get(&end_position).unwrap_or(&usize::MAX);
-        
-        // min_distance
-
-        if min_distance < usize::MAX {
-            let mut path = Vec::new();
-            let mut current_state = end_position;
-
-            while current_state != (initial_position.position) {
-                path.push(current_state);
-                current_state = self.predecessors[&current_state];
-            }
-            path.push((initial_position.position.0, initial_position.position.1));
-            path.reverse();
-    
-            println!("Shortest path distance: {}", min_distance);
-
-            for pos in &path {
-                println!("Position: {:?}", pos);
-            }
-
-            println!("{:?}", self.positions);
-            
-            self.print_path(&path);
-            min_distance
-        } else {
-            println!("No valid path found");
-            usize::MAX
-        }
+        self.print_path(paths.get(&end_position).unwrap_or(&vec![]));
+        *tentative_distances.get(&end_position).unwrap_or(&usize::MAX)
     }
 
-    fn print_path(&self, path: &Vec<(usize, usize)>) {
+    fn print_path(&self, path: &Vec<Position>) {
+        path.iter().for_each(|p| println!("{:?}", p));
         for (i, p) in self.positions.iter().enumerate() {
-            if path.contains(&p.position) {
+            if path.contains(&p) {
                 print!("[{:?}]", p.cost);
             }
             else {
@@ -230,12 +207,12 @@ impl Grid {
     fn get_neighbours(&self, pos: Position) -> Option<Vec<Position>> {
         let (y, x) = pos.position;
         let mut neighbours = Vec::new();
-    
         let directions = [Direction::Up, Direction::Down, Direction::Left, Direction::Right];
         for &dir in &directions {
-            if pos.can_move_in_direction(dir, self.min_steps, self.max_steps) {
+            // println!("{:?} {:?} {:?}", pos, dir, pos.can_move_in_direction(dir, self.width, self.height, self.min_steps, self.max_steps));
+            if pos.can_move_in_direction(dir, self.width, self.height, self.min_steps, self.max_steps) {
                 if let Some(new_pos) = self.next_position_in_direction(pos, dir) {
-                    println!("NEWPOS: {:?}", new_pos);
+                    println!("  Pushing: {:?}", new_pos);
                     neighbours.push(new_pos);
                 }
             }
@@ -267,7 +244,7 @@ impl Grid {
 
 pub fn solve1(input: Vec<String>) -> i64 {
     let min_steps = 0;
-    let max_steps = 5;
+    let max_steps = 3;
     let mut grid = Grid::new(input, min_steps, max_steps);
     let initial_position: Position = grid.get_position((0,0));
     let end_position = (grid.height- 1, grid.width - 1);
